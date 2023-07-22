@@ -145,7 +145,25 @@ final class EntityRepository implements EntityRepositoryInterface
                 }
 
                 if (1 === \count($sortFieldParts)) {
-                    $queryBuilder->addOrderBy('entity.'.$sortProperty, $sortOrder);
+                    if ($entityDto->isToManyAssociation($sortProperty)) {
+                        $metadata = $entityDto->getPropertyMetadata($sortProperty);
+
+                        /**
+                         * @var EntityManagerInterface $entityManager
+                         */
+                        $entityManager = $this->doctrine->getManager();
+                        $qb = $entityManager->createQueryBuilder()
+                            ->select('COUNT(relatedEntity.id)')
+                            ->from($metadata->get('targetEntity'), 'relatedEntity')
+                            ->where(sprintf('relatedEntity.%s = entity.id', $metadata->get('mappedBy')));
+
+                        $alias = 'count_'.$sortProperty;
+
+                        $queryBuilder->addSelect(sprintf('(%s) as HIDDEN %s', $qb->getDQL(), $alias));
+                        $queryBuilder->orderBy($alias, $sortOrder);
+                    } else {
+                        $queryBuilder->addOrderBy('entity.'.$sortProperty, $sortOrder);
+                    }
                 } else {
                     $queryBuilder->addOrderBy($sortProperty, $sortOrder);
                 }
