@@ -147,8 +147,8 @@ final class EntityRepository implements EntityRepositoryInterface
                 if (1 === \count($sortFieldParts)) {
                     if ($entityDto->isToManyAssociation($sortProperty)) {
                         $metadata = $entityDto->getPropertyMetadata($sortProperty);
-                        $sortEntityAlias = "ea_sort_" . $sortProperty . "_entity";
-                        $sortAlias = "ea_sort_{$sortProperty}_alias";
+                        $sortEntityAlias = sprintf('ea_sort_%s_entity', $sortProperty);
+                        $sortAlias = sprintf('ea_sort_%s_alias', $sortProperty);
 
                         /**
                          * @var EntityManagerInterface $entityManager
