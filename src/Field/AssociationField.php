@@ -48,6 +48,7 @@ final class AssociationField implements FieldInterface
             ->setFormType(EntityType::class)
             ->addCssClass('field-association')
             ->setDefaultColumns('col-md-7 col-xxl-6')
+            ->setSortable(false)
             ->setCustomOption(self::OPTION_AUTOCOMPLETE, false)
             ->setCustomOption(self::OPTION_EMBEDDED_CRUD_FORM_CONTROLLER, null)
             ->setCustomOption(self::OPTION_WIDGET, self::WIDGET_AUTOCOMPLETE)
