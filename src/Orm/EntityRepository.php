@@ -4,6 +4,7 @@ namespace EasyCorp\Bundle\EasyAdminBundle\Orm;
 
 use Doctrine\DBAL\Platforms\PostgreSQLPlatform;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 use EasyCorp\Bundle\EasyAdminBundle\Collection\FieldCollection;
@@ -147,20 +148,29 @@ final class EntityRepository implements EntityRepositoryInterface
                 if (1 === \count($sortFieldParts)) {
                     if ($entityDto->isToManyAssociation($sortProperty)) {
                         $metadata = $entityDto->getPropertyMetadata($sortProperty);
-                        $sortEntityAlias = sprintf('ea_sort_%s_entity', $sortProperty);
-                        $sortAlias = sprintf('ea_sort_%s_alias', $sortProperty);
 
                         /**
-                         * @var EntityManagerInterface $entityManager
+                         * @var QueryBuilder $countQueryBuilder
                          */
-                        $entityManager = $this->doctrine->getManager();
-                        $qb = $entityManager->createQueryBuilder()
-                            ->select(sprintf('COUNT(%s.id)', $sortEntityAlias))
-                            ->from($metadata->get('targetEntity'), $sortEntityAlias)
-                            ->where(sprintf('%s.%s = %s.id', $sortEntityAlias, $metadata->get('mappedBy'), current($queryBuilder->getRootAliases())));
+                        $countQueryBuilder = $this->doctrine->getManager()->createQueryBuilder();
 
-                        $queryBuilder->addSelect(sprintf('(%s) as HIDDEN %s', $qb->getDQL(), $sortAlias));
-                        $queryBuilder->orderBy($sortAlias, $sortOrder);
+                        if (ClassMetadataInfo::MANY_TO_MANY === $metadata->get('type')) {
+                            // many-to-many relation
+                            $countQueryBuilder
+                                ->select($queryBuilder->expr()->count('subQueryEntity'))
+                                ->from($entityDto->getFqcn(), 'subQueryEntity')
+                                ->leftJoin(sprintf('subQueryEntity.%s', $sortProperty), 'relatedEntity')
+                                ->where('subQueryEntity = entity');
+                        } else {
+                            // one-to-many relation
+                            $countQueryBuilder
+                                ->select($queryBuilder->expr()->count('subQueryEntity'))
+                                ->from($metadata->get('targetEntity'), 'subQueryEntity')
+                                ->where(sprintf('subQueryEntity.%s = entity', $metadata->get('mappedBy')));
+                        }
+
+                        $queryBuilder->addSelect(sprintf('(%s) as HIDDEN sub_query_sort', $countQueryBuilder->getDQL()));
+                        $queryBuilder->orderBy('sub_query_sort', $sortOrder);
                     } else {
                         $queryBuilder->addOrderBy('entity.'.$sortProperty, $sortOrder);
                     }
