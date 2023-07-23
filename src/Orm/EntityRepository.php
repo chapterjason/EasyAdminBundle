@@ -149,10 +149,9 @@ final class EntityRepository implements EntityRepositoryInterface
                     if ($entityDto->isToManyAssociation($sortProperty)) {
                         $metadata = $entityDto->getPropertyMetadata($sortProperty);
 
-                        /**
-                         * @var QueryBuilder $countQueryBuilder
-                         */
-                        $countQueryBuilder = $this->doctrine->getManager()->createQueryBuilder();
+                        /** @var EntityManagerInterface $entityManager */
+                        $entityManager = $this->doctrine->getManagerForClass($entityDto->getFqcn());
+                        $countQueryBuilder = $entityManager->createQueryBuilder();
 
                         if (ClassMetadataInfo::MANY_TO_MANY === $metadata->get('type')) {
                             // many-to-many relation
