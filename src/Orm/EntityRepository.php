@@ -147,20 +147,20 @@ final class EntityRepository implements EntityRepositoryInterface
                 if (1 === \count($sortFieldParts)) {
                     if ($entityDto->isToManyAssociation($sortProperty)) {
                         $metadata = $entityDto->getPropertyMetadata($sortProperty);
+                        $sortEntityAlias = "ea_sort_" . $sortProperty . "_entity";
+                        $sortAlias = "ea_sort_{$sortProperty}_alias";
 
                         /**
                          * @var EntityManagerInterface $entityManager
                          */
                         $entityManager = $this->doctrine->getManager();
                         $qb = $entityManager->createQueryBuilder()
-                            ->select('COUNT(relatedEntity.id)')
-                            ->from($metadata->get('targetEntity'), 'relatedEntity')
-                            ->where(sprintf('relatedEntity.%s = entity.id', $metadata->get('mappedBy')));
+                            ->select(sprintf('COUNT(%s.id)', $sortEntityAlias))
+                            ->from($metadata->get('targetEntity'), $sortEntityAlias)
+                            ->where(sprintf('%s.%s = %s.id', $sortEntityAlias, $metadata->get('mappedBy'), current($queryBuilder->getRootAliases())));
 
-                        $alias = 'count_'.$sortProperty;
-
-                        $queryBuilder->addSelect(sprintf('(%s) as HIDDEN %s', $qb->getDQL(), $alias));
-                        $queryBuilder->orderBy($alias, $sortOrder);
+                        $queryBuilder->addSelect(sprintf('(%s) as HIDDEN %s', $qb->getDQL(), $sortAlias));
+                        $queryBuilder->orderBy($sortAlias, $sortOrder);
                     } else {
                         $queryBuilder->addOrderBy('entity.'.$sortProperty, $sortOrder);
                     }
