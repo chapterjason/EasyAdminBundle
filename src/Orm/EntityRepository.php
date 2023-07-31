@@ -158,7 +158,7 @@ final class EntityRepository implements EntityRepositoryInterface
                             $countQueryBuilder
                                 ->select($queryBuilder->expr()->count('subQueryEntity'))
                                 ->from($entityDto->getFqcn(), 'subQueryEntity')
-                                ->leftJoin(sprintf('subQueryEntity.%s', $sortProperty), 'relatedEntity')
+                                ->join(sprintf('subQueryEntity.%s', $sortProperty), 'relatedEntity')
                                 ->where('subQueryEntity = entity');
                         } else {
                             // one-to-many relation
