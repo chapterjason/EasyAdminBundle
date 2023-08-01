@@ -6,20 +6,20 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
-use EasyCorp\Bundle\EasyAdminBundle\Tests\TestApplication\Entity\User;
+use EasyCorp\Bundle\EasyAdminBundle\Tests\TestApplication\Entity\AssociationFizz;
 
-class UserSortCrudController extends AbstractCrudController
+class AssociationFizzCrudController extends AbstractCrudController
 {
     public static function getEntityFqcn(): string
     {
-        return User::class;
+        return AssociationFizz::class;
     }
 
     public function configureFields(string $pageName): iterable
     {
         return [
             TextField::new('name'),
-            AssociationField::new('blogPosts'),
+            AssociationField::new('associationBaz'),
         ];
     }
 

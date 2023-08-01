@@ -38,6 +38,8 @@ class CustomCrudSearchControllerTest extends AbstractCrudTestCase
         // the CRUD Controller associated to this test has configured the search
         // properties used by the search engine. That's why results are not the default ones
         $totalNumberOfPosts = 20;
+        $numOfPostsWrittenByEachAuthor = 4;
+        $numOfPostsPublishedByEachUser = 2;
 
         yield 'search by blog post title yields no results' => [
             'blog post',
@@ -56,12 +58,12 @@ class CustomCrudSearchControllerTest extends AbstractCrudTestCase
 
         yield 'quoted search by author or published email' => [
             '"user4@"',
-            7,
+            $numOfPostsWrittenByEachAuthor + $numOfPostsPublishedByEachUser,
         ];
 
         yield 'multiple search by author or publisher email (partial or complete)' => [
             '"user2@example.com" "user4@"',
-            12,
+            2 * $numOfPostsWrittenByEachAuthor + 2 * $numOfPostsPublishedByEachUser,
         ];
     }
 }
